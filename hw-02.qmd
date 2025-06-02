@@ -1,18 +1,98 @@
 ---
 title: "HW 02"
-author: "INSERT YOUR NAME HERE"
+subtitle: "INFO 526: Summer 2025"
+author: "Nathaniel Cross"
+date: 2025-06-02
 format: 
   html:
     embed-resources: true
 toc: true
 ---
 
+## 0 - Setup
+
+```{r setup}
+
+# install and load packages
+if(!require(pacman))
+  install.packages("pacman")
+
+pacman::p_load(tidyverse, 
+               glue,
+               scales,
+               countdown,
+               ggthemes,
+               gt,
+               palmerpenguins,
+               openintro,
+               ggrepel,
+               patchwork,
+               quantreg,
+               janitor,
+               colorspace,
+               broom,
+               fs,
+               here,
+               openintro,
+               gghighlight,
+               lubridate,
+               dsbox,
+               ggridges
+               )
+
+devtools::install_github("tidyverse/dsbox")
+
+# set theme for ggplot2
+ggplot2::theme_set(ggplot2::theme_minimal(base_size = 14))
+
+# set width of code output
+options(width = 65)
+
+# set figure parameters for knitr
+knitr::opts_chunk$set(
+  fig.width = 7,        # 7" width
+  fig.asp = 0.618,      # the golden ratio
+  fig.retina = 3,       # dpi multiplier for displaying HTML output on retina
+  fig.align = "center", # center align figures
+  dpi = 300             # higher dpi, sharper image
+)
+```
+
 ## 1 - A new day, a new plot, a new geom
 
-```{r}
-#| label: label-me-1
+```{r q1}
 
+# loading the data
+edibnb <- edibnb |>
+  glimpse()
+
+# wrangling
+tapply(edibnb$review_scores_rating, edibnb$neighbourhood, summary) # Source: BenBarnes (StackOverflow)
+
+edibnb_wrangle <- edibnb |>
+  mutate(
+  neighbourhood = fct_relevel(neighbourhood, "Morningside", "Bruntsfield", "Stockbridge", "Cannonmills", "New Town", "Leith", "Marchmont", "West End", "Haymarket", "Old Town", "Newington", "Tollcross", "Southside")
+)
+
+# plot
+edibnb_wrangle |>
+  filter(!is.na(neighbourhood)) |>
+  ggplot(aes(x = review_scores_rating, y = neighbourhood)) +
+  geom_density_ridges(scale = 1.5, fill = "deepskyblue3") + 
+  labs(
+    x = "Rating",
+    y = NULL,
+    title = "Ratings of Edinburgh Airbnbs",
+    subtitle = "By neighborhood"
+  ) +
+  coord_cartesian(clip = "off") +
+  theme(
+    plot.title.position = "plot"
+  ) +
+  theme_ridges()
 ```
+
+In interpreting this plot, one finds that most Airbnbs in Edinburgh are rated similarly, with high scores given to almost all properties. Ranked in order of descending median, we can interpret that certain neighborhoods like Bruntsfield and Morningside do receive higher ratings (median = 98), however variation between the best- and worst-ranked neighborhoods is minimal. Unfortunately, given the relative closeness of this data, a plot may not be the best tool to examine nuance in the dataset and a more traditional statistical summary might prove more useful.
 
 ## 2 - Foreign Connected PACs
 
@@ -23,8 +103,6 @@ toc: true
 
 ## 3 - Median housing prices in the US
 
-
 ## 4 - Expect More. Plot More.
-
 
 ## 5 - Mirror, mirror on the wall, who’s the ugliest of them all?
