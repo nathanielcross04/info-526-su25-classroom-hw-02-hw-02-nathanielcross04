@@ -96,9 +96,65 @@ In interpreting this plot, one finds that most Airbnbs in Edinburgh are rated si
 
 ## 2 - Foreign Connected PACs
 
-```{r}
-#| label: label-me-2
+```{r q2}
 
+# get a list of files with "Foreign Connected PAC" in their names
+list_of_files <- dir_ls(path = "data", regexp = "Foreign Connected PAC")
+
+# read all files and row bind them
+# keeping track of the file name in a new column called year
+pac <- read_csv(list_of_files, id = "year")
+
+# cleaning var names
+pac <- pac |>
+  janitor::clean_names()
+
+# replace year obs with single year
+pac$year[pac$year== "data/Foreign Connected PACs, 1999-2000.csv"] = "2000"
+pac$year[pac$year== "data/Foreign Connected PACs, 2001-2002.csv"] = "2002"
+pac$year[pac$year== "data/Foreign Connected PACs, 2003-2004.csv"] = "2004"
+pac$year[pac$year== "data/Foreign Connected PACs, 2005-2006.csv"] = "2006"
+pac$year[pac$year== "data/Foreign Connected PACs, 2007-2008.csv"] = "2008"
+pac$year[pac$year== "data/Foreign Connected PACs, 2009-2010.csv"] = "2010"
+pac$year[pac$year== "data/Foreign Connected PACs, 2011-2012.csv"] = "2012"
+pac$year[pac$year== "data/Foreign Connected PACs, 2013-2014.csv"] = "2014"
+pac$year[pac$year== "data/Foreign Connected PACs, 2015-2016.csv"] = "2016"
+pac$year[pac$year== "data/Foreign Connected PACs, 2017-2018.csv"] = "2018"
+pac$year[pac$year== "data/Foreign Connected PACs, 2019-2020.csv"] = "2020"
+pac$year[pac$year== "data/Foreign Connected PACs, 2021-2022.csv"] = "2022" # Source: Geeks for Geeks (https://www.geeksforgeeks.org/replace-values-based-on-condition-in-r/)
+
+pac$year |>
+  unique()
+
+# convert to integer
+pac$year <- as.integer(pac$year) # Source: Geeks for Geeks (https://www.geeksforgeeks.org/convert-a-character-object-to-integer-in-r-programming-as-integer-function/)
+
+pac |>
+  glimpse()
+
+# separate county/company of origin
+pac <- pac |>
+  separate(
+  col = country_of_origin_parent_company, 
+  sep = "/", 
+  into = c("county_of_origin", "parent_company")
+) # Source: rdr (Posit Forum)
+
+# drop total donations
+pac$total <- NULL
+
+# dropping $
+dems <- pac$dems
+repubs <- pac$repubs
+
+pac$dems <- gsub('[^[:alnum:] ]','', dems)
+pac$repubs <- gsub('[^[:alnum:] ]','', repubs)
+
+pac$dems <- as.double(pac$dems)
+pac$repubs <- as.double(pac$repubs)
+
+pac |>
+  glimpse()
 ```
 
 ## 3 - Median housing prices in the US
