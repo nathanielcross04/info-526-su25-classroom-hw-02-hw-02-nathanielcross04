@@ -228,6 +228,47 @@ While donations from France-connected PACs to U.S. political parties are signifi
 
 ## 3 - Median housing prices in the US
 
+```{r q3 plot 1}
+
+# load in data
+median_housing <- read_csv("data/median-housing.csv")
+recessions <- read_csv("data/recessions.csv")
+
+median_housing |>
+  glimpse()
+
+recessions |>
+  glimpse()
+
+names(median_housing)[names(median_housing) == "DATE"] <- "date"
+names(median_housing)[names(median_housing) == "MSPUS"] <- "price"
+
+median_housing |>
+  glimpse()
+
+# plot 1
+median_housing |>
+  ggplot(aes(x = date, y = price)) +
+  geom_line(color = "blue", linewidth = 1) +
+  labs(
+    x = NULL,
+    y = "Dollars",
+    title = "Median sales price of houses sold in the United States",
+    subtitle = "Not seasonally adjusted",
+    caption = "Source: Census; HUD"
+  ) +
+    scale_x_date(date_breaks = "5 years", date_labels = "%Y") +
+    scale_y_continuous(labels = scales::label_comma(), breaks = seq(0, 400000, by = 40000), limits = c(0, 400000)) +
+    theme(plot.title.position = "plot",
+          panel.grid.major.x = element_blank(), 
+          panel.grid.minor.x = element_blank()
+          )
+```
+
+```{r q3 plot 2}
+
+```
+
 ## 4 - Expect More. Plot More.
 
 ## 5 - Mirror, mirror on the wall, who’s the ugliest of them all?
