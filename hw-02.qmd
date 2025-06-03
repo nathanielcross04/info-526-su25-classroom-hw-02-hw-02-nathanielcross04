@@ -96,7 +96,7 @@ In interpreting this plot, one finds that most Airbnbs in Edinburgh are rated si
 
 ## 2 - Foreign Connected PACs
 
-```{r q2}
+```{r q2 data wrangling}
 
 # get a list of files with "Foreign Connected PAC" in their names
 list_of_files <- dir_ls(path = "data", regexp = "Foreign Connected PAC")
@@ -137,7 +137,7 @@ pac <- pac |>
   separate(
   col = country_of_origin_parent_company, 
   sep = "/", 
-  into = c("county_of_origin", "parent_company")
+  into = c("country_of_origin", "parent_company")
 ) # Source: rdr (Posit Forum)
 
 # drop total donations
@@ -155,7 +155,76 @@ pac$repubs <- as.double(pac$repubs)
 
 pac |>
   glimpse()
+
+# rename party vars
+names(pac)[names(pac) == "dems"] <- "Democrat"
+names(pac)[names(pac) == "repubs"] <- "Republican" # Source: An Introduction to R for Research (https://bookdown.org/rwnahhas/IntroToR/rename.html)
+
+# pivoting
+pac <- pac |> 
+  pivot_longer(
+    cols = c(Democrat, Republican), 
+    names_to = "party", 
+    values_to = "amount"
+  )
+
+pac |>
+  view()
+
+# summary table
+country_total <- pac |>
+  filter(country_of_origin == "UK") |>
+  group_by(year, party) |>
+  summarise(country_total = sum(amount, na.rm = TRUE))
+
+print(country_total)
 ```
+
+```{r q2 plotting}
+
+# plot recreation
+country_total |>
+  ggplot(aes(x = year, y = country_total, color = party)) +
+  geom_line(linewidth = 1) +
+  labs(
+    x = "Year",
+    y = "Total amount",
+    title = "Contributions to US political parties from UK-connected PACs",
+    color = "Party",
+    caption = "Source: OpenSecrets.org"
+  ) +
+  scale_y_continuous(labels = label_dollar(scale = 1/1000000, suffix = "M")) +
+  scale_color_manual(values = c("blue", "red")) +
+  theme(axis.title = element_text(hjust = 0),
+        text = element_text(size = 11),
+        legend.position = c(0.9, 0.15)
+        )
+  
+# new plot (different country)
+france_total <- pac |>
+  filter(country_of_origin == "France") |>
+  group_by(year, party) |>
+  summarise(country_total = sum(amount, na.rm = TRUE))
+
+france_total |>
+  ggplot(aes(x = year, y = country_total, color = party)) +
+  geom_line(linewidth = 1) +
+  labs(
+    x = "Year",
+    y = "Total amount",
+    title = "Contributions to US political parties from France-connected PACs",
+    color = "Party",
+    caption = "Source: OpenSecrets.org"
+  ) +
+  scale_y_continuous(labels = label_dollar(scale = 1/1000000, suffix = "M")) +
+  scale_color_manual(values = c("blue", "red")) +
+  theme(axis.title = element_text(hjust = 0),
+        text = element_text(size = 11),
+        legend.position = c(0.9, 0.15)
+        )
+```
+
+While donations from France-connected PACs to U.S. political parties are significantly lower than UK-connected PACs (max \$1M from France vs. \~\$3.5M from UK), the above plot mirrors the partisan support trend seen in the UK plot: PACs connected to both these countries favor the Republican party, and for the most part, donations are increasing over time. Most significantly is the spike in donations to the Republican party just after 2015 (likely for the 2016 election), which could reflect companies' favoring of Trump's supposedly prosperous economic policies. This rationale would also make sense given the sharp drop in donations to the Republican party following Trump's election and the revelation to the world of his lack of substantive economic policies.
 
 ## 3 - Median housing prices in the US
 
